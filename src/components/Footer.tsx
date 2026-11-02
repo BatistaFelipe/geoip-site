@@ -64,12 +64,14 @@ function Icon({ name }: { name: "github" | "globe" | "heart" }) {
 
 export default function Footer() {
   return (
-    <footer className="mt-10 pt-4 border-t border-zinc-800 text-zinc-400 text-center">
+    <footer className="mt-10 pt-4 border-t border-zinc-700 text-zinc-300 text-center">
       <p className="flex items-center justify-center gap-2">
-        <span className="text-red-400">
+        <span className="text-red-400" aria-hidden="true">
           <Icon name="heart" />
         </span>
-        <span>Ferramenta gratuita e livre de an&uacute;ncios.</span>
+        <span lang="pt-BR">
+          Ferramenta gratuita e livre de an&uacute;ncios.
+        </span>
       </p>
       <p className="mt-2 flex items-center justify-center gap-6">
         {LINKS.map(({ label, url, icon }) => (
@@ -78,10 +80,11 @@ export default function Footer() {
             href={url}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 hover:text-green-400"
+            className="inline-flex items-center gap-2 hover:text-green-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-green-400 focus-visible:outline-offset-2"
           >
             <Icon name={icon} />
             <span>{label}</span>
+            <span className="sr-only">(opens in new tab)</span>
           </a>
         ))}
       </p>
