@@ -21,12 +21,6 @@ const FIELD_ORDER: ReadonlyArray<keyof LookupResult> = [
   "timezone",
 ];
 
-const LABEL_WIDTH = 10;
-
-function formatLine(label: string, value: string): string {
-  return `${(label + ":").padEnd(LABEL_WIDTH, " ")}${value}`;
-}
-
 export default function LookupForm() {
   const [target, setTarget] = useState("");
   const [state, setState] = useState<State>({ status: "idle" });
@@ -60,15 +54,17 @@ export default function LookupForm() {
   return (
     <section className="w-full">
       <div className="mb-4">
-        <p className="text-green-400">$ geoip</p>
-        <p className="text-zinc-600">
-          ────────────────────────────────────────
-        </p>
+        <h1 className="text-green-400">$ geoip</h1>
+        <div className="border-t border-zinc-700 mt-1" />
       </div>
 
-      <form onSubmit={onSubmit} className="flex items-center gap-2">
+      <form
+        onSubmit={onSubmit}
+        className="flex flex-wrap sm:flex-nowrap items-center gap-2"
+      >
         <label htmlFor="target" className="text-green-400">
-          &gt;
+          <span aria-hidden="true">&gt;</span>
+          <span className="sr-only">IP or hostname</span>
         </label>
         <input
           id="target"
@@ -81,24 +77,37 @@ export default function LookupForm() {
           autoCapitalize="off"
           spellCheck={false}
           disabled={isLoading}
-          className="flex-1 bg-transparent border-b border-zinc-700 text-zinc-200 placeholder:text-zinc-600 focus:outline-none focus:border-green-400 disabled:opacity-50"
+          aria-invalid={state.status === "error"}
+          aria-describedby={
+            state.status === "error" ? "lookup-status" : undefined
+          }
+          className="min-w-0 flex-1 bg-transparent border-b border-zinc-700 text-zinc-200 placeholder:text-zinc-500 focus:outline-none focus:border-green-400 disabled:opacity-50"
         />
         <button
           type="submit"
           disabled={isLoading || !target.trim()}
+          aria-label={isLoading ? "loading" : undefined}
           className="text-green-400 border border-zinc-700 px-3 py-1 hover:border-green-400 disabled:opacity-40 disabled:cursor-not-allowed"
         >
-          {isLoading ? "[ ... ]" : "[ lookup ]"}
+          <span aria-hidden={isLoading}>
+            {isLoading ? "[ ... ]" : "[ lookup ]"}
+          </span>
         </button>
       </form>
 
-      <div className="mt-6 min-h-[16rem] whitespace-pre text-zinc-200 tabular-nums">
+      <div
+        id="lookup-status"
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+        className="mt-6 min-h-[16rem] text-zinc-200 tabular-nums break-words"
+      >
         {state.status === "idle" && (
-          <p className="text-zinc-600">{"// awaiting input"}</p>
+          <p className="text-zinc-500">{"// awaiting input"}</p>
         )}
 
         {state.status === "loading" && (
-          <p className="text-zinc-500">resolving {target.trim()}...</p>
+          <p className="text-zinc-400">resolving {target.trim()}...</p>
         )}
 
         {state.status === "error" && (
@@ -106,12 +115,19 @@ export default function LookupForm() {
         )}
 
         {state.status === "success" && (
-          <ul>
+          <ul className="space-y-1">
             {FIELD_ORDER.map((key) => {
               const value = state.data[key];
               if (!value) return null;
               return (
-                <li key={key}>{formatLine(key, String(value))}</li>
+                <li key={key} className="flex gap-2">
+                  <span className="text-zinc-400 shrink-0 w-24 whitespace-nowrap">
+                    {key}:
+                  </span>
+                  <span className="min-w-0 break-words">
+                    {String(value)}
+                  </span>
+                </li>
               );
             })}
           </ul>
